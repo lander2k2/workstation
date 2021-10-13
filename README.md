@@ -10,7 +10,7 @@ Set up a workstation for development.
 
 ## Variables
 
-Confirm variables at the top of setup.yml.
+Confirm variables at the top of `vars.yml`.
 
 If any updates are made to vars, don't forget to commit changes.
 
