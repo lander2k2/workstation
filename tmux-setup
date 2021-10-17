@@ -1,0 +1,9 @@
+#!/bin/bash
+
+tmux split-window -h
+tmux resize-pane -x 125
+tmux select-pane -t 0
+tmux split-window -v
+tmux resize-pane -y 20
+tmux select-pane -t 2
+
