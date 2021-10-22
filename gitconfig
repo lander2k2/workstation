@@ -1,0 +1,16 @@
+[user]
+    signingkey = ""
+	name = Rich Lander
+	email = lander2k2@protonmail.com
+[url "git@github.com:"]
+	insteadOf = https://github.com/
+[core]
+	pager = less -F -X
+[gpg]
+	program = /usr/local/bin/gpg
+[commit]
+    #gpgsign = true
+[alias]
+    log1 = log --graph --abbrev-commit --decorate --format=format:'%C(bold blue)%h%C(reset) - %C(bold green)(%ar)%C(reset) %C(white)%s%C(reset) %C(dim white)- %an%C(reset)%C(bold yellow)%d%C(reset)' --all
+    log2 = log --graph --abbrev-commit --decorate --format=format:'%C(bold blue)%h%C(reset) - %C(bold cyan)%aD%C(reset) %C(bold green)(%ar)%C(reset)%C(bold yellow)%d%C(reset)%n''          %C(white)%s%C(reset) %C(dim white)- %an%C(reset)' --all
+
