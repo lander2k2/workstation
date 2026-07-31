@@ -1,0 +1,43 @@
+---
+# Non-sensitive defaults. Safe to commit.
+# Identity-specific values live in personal.yml (gitignored).
+
+# projects_dirname is used unqualified in shell templates as $HOME/<name> so the
+# generated dotfiles stay portable; projects_dir is the absolute path for tasks.
+projects_dirname: Projects
+projects_dir: "{{ ansible_facts.env.HOME }}/{{ projects_dirname }}"
+
+# --- zsh -------------------------------------------------------------------
+# Empty theme: the prompt comes from starship, not oh-my-zsh.
+zsh_theme: ""
+omz_plugins:
+  - kubectl
+
+editor: vim
+
+# PATH entries appended in .zshenv, in order. $HOME expands at shell runtime.
+zshenv_paths:
+  - /usr/local/kubebuilder/bin
+  - $HOME/go/bin
+  - /usr/local/go/bin
+  - $HOME/.krew/bin
+  - $HOME/.local/bin
+  - $HOME/.threeport/bin
+
+# macOS only: `pip install --user` bin dir. Bump when the system python moves.
+macos_python_version: "3.9"
+
+# Prepended in .zshrc (these must win over system equivalents).
+# Homebrew-specific, so macOS only; see zsh/templates/zshrc.j2.
+macos_prepend_paths:
+  - "{{ homebrew_prefix }}/opt/libpq/bin"
+  - "{{ homebrew_prefix }}/opt/postgresql@18/bin"
+
+virtualenvwrapper_python: /usr/bin/python3
+
+# --- vim -------------------------------------------------------------------
+# .vimrc uses both pathogen and vim-plug, so both loaders are installed.
+vim_plug_plugins:
+  - repo: fatih/vim-go
+    post: ":GoInstallBinaries"
+  - repo: jparise/vim-graphql

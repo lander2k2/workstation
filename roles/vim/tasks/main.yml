@@ -1,0 +1,53 @@
+---
+- name: Ensure vim directories exist
+  ansible.builtin.file:
+    path: "{{ ansible_facts.env.HOME }}/.vim/{{ item }}"
+    state: directory
+    mode: "0755"
+  loop:
+    - autoload
+    - bundle
+    - plugged
+
+# .vimrc calls both `pathogen#infect()` and vim-plug, so both loaders must be
+# present or vim throws errors on every start.
+- name: Install plugin loaders
+  ansible.builtin.get_url:
+    url: "{{ item.url }}"
+    dest: "{{ ansible_facts.env.HOME }}/.vim/autoload/{{ item.name }}"
+    mode: "0644"
+  loop:
+    - name: pathogen.vim
+      url: https://tpo.pe/pathogen.vim
+    - name: plug.vim
+      url: https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim
+
+- name: Install vimrc
+  ansible.builtin.copy:
+    src: vimrc
+    dest: "{{ ansible_facts.env.HOME }}/.vimrc"
+    mode: "0644"
+    backup: true
+
+- name: Install vim plugins
+  ansible.builtin.command: vim -es -u "{{ ansible_facts.env.HOME }}/.vimrc" -i NONE -c "PlugInstall! --sync" -c qa
+  register: plug_install
+  changed_when: true
+  # vim -es exits nonzero on harmless startup noise; the check below is what matters.
+  failed_when: false
+
+- name: Verify plugins were installed
+  ansible.builtin.stat:
+    path: "{{ ansible_facts.env.HOME }}/.vim/plugged/{{ item.repo | basename }}"
+  register: plug_dirs
+  loop: "{{ vim_plug_plugins }}"
+
+- name: Warn about plugins that failed to install
+  ansible.builtin.debug:
+    msg: >-
+      {{ item.item.repo }} did not install. Run :PlugInstall inside vim to see why.
+      vim-go additionally needs Go on PATH for :GoInstallBinaries.
+  loop: "{{ plug_dirs.results }}"
+  loop_control:
+    label: "{{ item.item.repo }}"
+  when: not item.stat.exists

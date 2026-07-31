@@ -1,0 +1,9 @@
+---
+# tmux.conf is pure key bindings with no OS-specific or personal content, so it
+# is copied verbatim rather than templated.
+- name: Install tmux config
+  ansible.builtin.copy:
+    src: tmux.conf
+    dest: "{{ ansible_facts.env.HOME }}/.tmux.conf"
+    mode: "0644"
+    backup: true

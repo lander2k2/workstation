@@ -1,0 +1,4 @@
+# Identity-specific values — never commit. See personal.yml.example.
+group_vars/all/personal.yml
+
+*.retry

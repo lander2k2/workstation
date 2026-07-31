@@ -1,0 +1,9 @@
+#jinja2: trim_blocks: True, lstrip_blocks: True
+# Managed by Ansible. Edit roles/zsh/templates/zprofile.j2, not this file.
+
+{% if homebrew_prefix is defined and homebrew_prefix %}
+# Set PATH, MANPATH, etc. for Homebrew.
+if [ -x "{{ homebrew_prefix }}/bin/brew" ]; then
+    eval "$({{ homebrew_prefix }}/bin/brew shellenv)"
+fi
+{% endif %}

@@ -1,0 +1,24 @@
+---
+- name: Ensure ~/.config exists
+  ansible.builtin.file:
+    path: "{{ ansible_facts.env.HOME }}/.config"
+    state: directory
+    mode: "0755"
+
+- name: Write zsh config
+  ansible.builtin.template:
+    src: "{{ item.src }}"
+    dest: "{{ ansible_facts.env.HOME }}/{{ item.dest }}"
+    mode: "0644"
+    backup: true
+  loop:
+    - { src: zshenv.j2, dest: .zshenv }
+    - { src: zshrc.j2, dest: .zshrc }
+    - { src: zprofile.j2, dest: .zprofile }
+
+- name: Install starship config
+  ansible.builtin.copy:
+    src: starship.toml
+    dest: "{{ ansible_facts.env.HOME }}/.config/starship.toml"
+    mode: "0644"
+    backup: true

@@ -1,0 +1,112 @@
+---
+- name: Install packages (macOS)
+  when: ansible_facts.system == 'Darwin'
+  block:
+    - name: Check for Homebrew
+      ansible.builtin.stat:
+        path: "{{ homebrew_prefix }}/bin/brew"
+      register: brew_bin
+
+    - name: Fail if Homebrew is missing
+      ansible.builtin.fail:
+        msg: >-
+          Homebrew is not installed at {{ homebrew_prefix }}. Install it first:
+          /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+      when: not brew_bin.stat.exists
+
+    - name: Install Homebrew packages
+      community.general.homebrew:
+        name:
+          - zsh
+          - git
+          - tmux
+          - vim
+          - curl
+          - starship
+          - direnv
+          - k9s
+          # provides sha256sum, which the `checksum` alias expects
+          - coreutils
+        state: present
+
+- name: Install packages (Debian/Ubuntu)
+  when: ansible_facts.os_family == 'Debian'
+  become: true
+  ansible.builtin.apt:
+    name:
+      - zsh
+      - git
+      - tmux
+      - vim
+      - curl
+      - direnv
+      # provides the `copy` alias
+      - xclip
+    state: present
+    update_cache: true
+    cache_valid_time: 3600
+
+- name: Install packages (RedHat/Fedora)
+  when: ansible_facts.os_family == 'RedHat'
+  become: true
+  ansible.builtin.dnf:
+    name:
+      - zsh
+      - git
+      - tmux
+      - vim
+      - curl
+      - direnv
+      - xclip
+    state: present
+
+# starship and k9s are not packaged in the default Linux repos.
+- name: Install starship and k9s (Linux)
+  when: ansible_facts.system == 'Linux'
+  block:
+    - name: Check for starship
+      ansible.builtin.command: command -v starship
+      register: starship_check
+      changed_when: false
+      failed_when: false
+
+    - name: Install starship
+      become: true
+      ansible.builtin.shell:
+        cmd: curl -fsSL https://starship.rs/install.sh | sh -s -- --yes
+      when: starship_check.rc != 0
+      changed_when: true
+
+    - name: Check for k9s
+      ansible.builtin.command: command -v k9s
+      register: k9s_check
+      changed_when: false
+      failed_when: false
+
+    - name: Warn if k9s is missing
+      ansible.builtin.debug:
+        msg: >-
+          k9s is not installed and has no standard Linux package. The kk/kkpo/kkno
+          aliases will not work until you install it from
+          https://github.com/derailed/k9s/releases
+      when: k9s_check.rc != 0
+
+- name: Locate the zsh binary
+  ansible.builtin.command: command -v zsh
+  register: zsh_path
+  changed_when: false
+
+- name: Ensure zsh is a permitted login shell
+  become: true
+  ansible.builtin.lineinfile:
+    path: /etc/shells
+    line: "{{ zsh_path.stdout }}"
+    state: present
+  when: ansible_facts.system == 'Linux'
+
+- name: Set zsh as the login shell
+  become: true
+  ansible.builtin.user:
+    name: "{{ ansible_facts.user_id }}"
+    shell: "{{ zsh_path.stdout }}"
+  when: ansible_facts.env.SHELL != zsh_path.stdout

@@ -1,0 +1,40 @@
+---
+- name: Configure workstation
+  hosts: workstations
+  gather_facts: true
+
+  pre_tasks:
+    - name: Verify personal vars are present
+      ansible.builtin.assert:
+        that:
+          - personal_vars_loaded | default(false)
+        fail_msg: >-
+          group_vars/all/personal.yml is missing. It is gitignored because it
+          holds identity-specific values. Copy personal.yml.example to
+          personal.yml and fill it in before running this playbook.
+        success_msg: Personal vars loaded.
+      tags: [always]
+
+    - name: Detect Homebrew prefix
+      ansible.builtin.set_fact:
+        homebrew_prefix: >-
+          {{
+            '/opt/homebrew' if (ansible_facts.system == 'Darwin' and ansible_facts.architecture == 'arm64')
+            else '/usr/local' if ansible_facts.system == 'Darwin'
+            else '/home/linuxbrew/.linuxbrew'
+          }}
+      tags: [always]
+
+  roles:
+    - role: packages
+      tags: [packages]
+    - role: oh_my_zsh
+      tags: [zsh, oh-my-zsh]
+    - role: zsh
+      tags: [zsh]
+    - role: tmux
+      tags: [tmux]
+    - role: vim
+      tags: [vim]
+    - role: projects
+      tags: [projects]

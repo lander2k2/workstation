@@ -1,0 +1,20 @@
+---
+# Cloned over HTTPS rather than the SSH remote used on the source machine, so
+# this works before any SSH keys are set up on a fresh workstation.
+- name: Clone oh-my-zsh
+  ansible.builtin.git:
+    repo: https://github.com/ohmyzsh/ohmyzsh.git
+    dest: "{{ ansible_facts.env.HOME }}/.oh-my-zsh"
+    depth: 1
+    version: master
+    # Do not clobber local edits under ~/.oh-my-zsh/custom on re-runs.
+    update: false
+
+- name: Ensure custom directories exist
+  ansible.builtin.file:
+    path: "{{ ansible_facts.env.HOME }}/.oh-my-zsh/custom/{{ item }}"
+    state: directory
+    mode: "0755"
+  loop:
+    - plugins
+    - themes

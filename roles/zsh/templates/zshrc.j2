@@ -1,0 +1,71 @@
+#jinja2: trim_blocks: True, lstrip_blocks: True
+{% set is_darwin = ansible_facts.system == 'Darwin' %}
+{% set prepend_paths = macos_prepend_paths if is_darwin else [] %}
+# Managed by Ansible. Edit roles/zsh/templates/zshrc.j2, not this file.
+
+ZSH_DISABLE_COMPFIX="true"
+
+{% if zsh_theme %}
+ZSH_THEME="{{ zsh_theme }}"
+{% else %}
+# No oh-my-zsh theme: the prompt is provided by starship, set up below.
+{% endif %}
+
+plugins=(
+{% for plugin in omz_plugins %}
+    {{ plugin }}
+{% endfor %}
+)
+
+source $ZSH/oh-my-zsh.sh
+
+# --- aliases ---------------------------------------------------------------
+
+{% if is_darwin %}
+alias copy="pbcopy"
+# sha256sum comes from coreutils, installed by the packages role.
+{% else %}
+alias copy="xclip -sel clip"
+{% endif %}
+alias checksum="sha256sum -c --ignore-missing checksums.txt"
+alias logdate="date -u +%Y-%m-%dT%H:%M:%S"
+alias kk='k9s --readonly'
+alias kkpo='k9s -c pod --readonly -A'
+alias kkno='k9s -c node --readonly'
+
+# threeport
+alias tdev='go run cmd/tptctl/main.go'
+alias timages='make -j test-build-control-plane && make -j control-plane-images-build && make -j control-plane-images-push'
+#alias tctl='./bin/tptctl'
+alias trun='tctl create control-plane -n dev-0 -p kind -i {{ container_registry_user }} -t test'
+
+# --- prompt ----------------------------------------------------------------
+
+# Guarded so a missing binary does not break every new shell.
+command -v starship >/dev/null 2>&1 && eval "$(starship init zsh)"
+
+# --- path ------------------------------------------------------------------
+
+{% for p in prepend_paths %}
+export PATH="{{ p }}:$PATH"
+{% endfor %}
+{% for p in extra_zshrc_paths | default([]) %}
+export PATH="$PATH:{{ p }}"
+{% endfor %}
+
+# --- tools -----------------------------------------------------------------
+
+# nvm
+export NVM_DIR="$HOME/.config/nvm"
+[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  # This loads nvm
+#[ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"
+
+# Makefile auto completion
+zstyle ':completion:*:*:make:*' tag-order 'targets'
+autoload -Uz compinit && compinit
+
+# direnv
+command -v direnv >/dev/null 2>&1 && eval "$(direnv hook zsh)"
+
+# virtualenvwrapper
+#source $HOME/.local/bin/virtualenvwrapper.sh

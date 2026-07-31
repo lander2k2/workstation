@@ -1,0 +1,13 @@
+---
+- name: Ensure Projects directory exists
+  ansible.builtin.file:
+    path: "{{ projects_dir }}"
+    state: directory
+    mode: "0755"
+
+- name: Install work.sh
+  ansible.builtin.copy:
+    src: work.sh
+    dest: "{{ projects_dir }}/work.sh"
+    mode: "0755"
+    backup: true

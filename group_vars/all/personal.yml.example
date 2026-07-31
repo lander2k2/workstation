@@ -1,0 +1,19 @@
+---
+# Copy to personal.yml and fill in. personal.yml is gitignored.
+#
+# Nothing here is a credential — no keys, tokens or passwords. These values are
+# separated because they identify you or name private infrastructure, which is
+# the kind of thing you do not want in a public repo.
+
+personal_vars_loaded: true
+
+# Comma-separated Go module prefixes that must bypass the public proxy.
+# Names private GitHub orgs, so it is kept out of version control.
+goprivate: "github.com/example-org/*"
+
+# Container registry account used by the `trun` alias in .zshrc.
+container_registry_user: "your-registry-user"
+
+# Extra PATH entries appended in .zshrc that are specific to your setup.
+extra_zshrc_paths:
+  - $HOME/.config/scale/bin

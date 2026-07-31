@@ -1,0 +1,21 @@
+#jinja2: trim_blocks: True, lstrip_blocks: True
+{% set py_bin = ['$HOME/Library/Python/' ~ macos_python_version ~ '/bin'] %}
+{% set path_entries = zshenv_paths + (py_bin if ansible_facts.system == 'Darwin' else []) %}
+# Managed by Ansible. Edit roles/zsh/templates/zshenv.j2, not this file.
+
+export PATH=$PATH:{{ path_entries | join(':') }}
+
+export EDITOR={{ editor }}
+
+export WORKON_HOME=$HOME/.virtualenvs
+export PROJECT_HOME=$HOME/{{ projects_dirname }}
+export VIRTUALENVWRAPPER_PYTHON='{{ virtualenvwrapper_python }}'
+
+export ZSH="$HOME/.oh-my-zsh"
+
+export XDG_CONFIG_HOME=$HOME/.config
+
+{% if goprivate %}
+export GOPRIVATE={{ goprivate }}
+{% endif %}
+export GOPATH=$HOME/go
