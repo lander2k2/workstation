@@ -65,7 +65,7 @@
   when: ansible_facts.system == 'Linux'
   block:
     - name: Check for starship
-      ansible.builtin.command: command -v starship
+      ansible.builtin.shell: command -v starship
       register: starship_check
       changed_when: false
       failed_when: false
@@ -78,7 +78,7 @@
       changed_when: true
 
     - name: Check for k9s
-      ansible.builtin.command: command -v k9s
+      ansible.builtin.shell: command -v k9s
       register: k9s_check
       changed_when: false
       failed_when: false
@@ -92,7 +92,7 @@
       when: k9s_check.rc != 0
 
 - name: Locate the zsh binary
-  ansible.builtin.command: command -v zsh
+  ansible.builtin.shell: command -v zsh
   register: zsh_path
   changed_when: false
 
